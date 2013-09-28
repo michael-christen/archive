@@ -1,29 +1,21 @@
 package com.mchristen.droidstats;
 
-import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
-import android.app.ListActivity;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
+import android.view.MenuItem;
 
-public class MainActivity extends Activity {
+public class MainActivity extends ListActivity {
 	
-
+	static final String[] MOBILE_OS =
+            new String[] { "Android", "iOS", "WindowsMobile", "Blackberry"};
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		ListView myForms = (ListView) this.findViewById(R.id.listView1);
-		
-		//Intent intent = new Intent(this, ListFruitActivity.class);
-	    //startActivity(intent);
+		setListAdapter(new MobileArrayAdapter(this, MOBILE_OS));
+		//getActionBar().hide();
 	}
 
 	@Override
@@ -31,6 +23,17 @@ public class MainActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()) {
+		case R.id.add_button:
+			startActivity( new Intent(this, CreateFormActivity.class));
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 }
