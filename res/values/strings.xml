@@ -4,5 +4,9 @@
     <string name="app_name">DroidStats</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="home_title">Forms</string>
+    <string name="create_form_button">Create a New Form</string>
+    <string name="title_activity_list_view_loader">ListViewLoader</string>
+    <string name="title_activity_list_fruit">ListFruitActivity</string>
 
 </resources>
