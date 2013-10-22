@@ -4,7 +4,7 @@ PROG: checker
  * File Name : checker.cpp
  * Purpose :
  * Creation Date : 03-10-2013
- * Last Modified : Tue 22 Oct 2013 01:53:54 PM EDT
+ * Last Modified : Tue 22 Oct 2013 02:41:34 PM EDT
  * Created By : Michael Christen
  _._._._._._._._._._._._._._._._._._._._._.*/
 #include<iostream>
@@ -36,8 +36,8 @@ bool validPlace(const vector<int> & board, int place)
 
 //vector<bool> columns, vector<bool> diagonal/, vector<bool> diagonalUpRight
 void solveBoard(vector<vector<int> > &solns, vector<int> curSol,
-	vector<bool> & cols, vector<bool> & diagonalUR, 
-	vector<bool> & diagonalDL, int n)
+	vector<int> & cols, vector<int> & diagonalUR, 
+	vector<int> & diagonalDL, int n)
 {
     if((int)curSol.size() == n)
     {
@@ -45,22 +45,22 @@ void solveBoard(vector<vector<int> > &solns, vector<int> curSol,
 	return;
     }
     
-    for(int i = 1; i <= n; ++i)
+    for(int i = 0; i < n; ++i)
     {
-	bool isValid = true;
-	for(int k = curSol.size() - 1, j = 1; k >= 0; --k, ++j)
-	{
-	    //same column, \,  /
-	    if(curSol[k] == i || curSol[k] == i -j || curSol[k] == i + j)
-	    {
-		isValid = false;
-		break;
-	    }
-	}
-	if(isValid)
+	//bool isValid = true;
+	int ddl, dur;
+	ddl = n*2 - 2 - (curSol.size() - i + n - (n+1)%2);
+	dur = curSol.size() + i;
+	if(!cols[i] && !diagonalDL[ddl] && !diagonalUR[dur])
 	{
 	    curSol.push_back(i);
+	    cols[i] = true;
+	    diagonalDL[ddl] = true;
+	    diagonalUR[dur] = true;
 	    solveBoard(solns,curSol,cols,diagonalUR,diagonalDL,n);
+	    diagonalUR[dur] = false;
+	    diagonalDL[ddl] = false;
+	    cols[i] = false;
 	    curSol.pop_back();
 	}
     }
@@ -69,9 +69,9 @@ void solveBoard(vector<vector<int> > &solns, vector<int> curSol,
 vector<vector<int> > getBoardSolns(int n)
 {
     vector<vector<int> > solns;
-    vector<bool> cols(n,false);
-    vector<bool> dUR(n,false);
-    vector<bool> dDL(n,false);
+    vector<int> cols(n,false);
+    vector<int> dUR(2*n,false);
+    vector<int> dDL(2*n,false);
     solveBoard(solns, vector<int>(), cols, dUR, dDL, n);
     return solns;
 }
@@ -89,7 +89,7 @@ int main()
     {
 	for(size_t j = 0; j < solns[i].size(); ++j)
 	{
-	    outf << solns[i][j];
+	    outf << solns[i][j]+1;
 	    if(j != solns[i].size() - 1)
 		outf << ' ';
 	}
