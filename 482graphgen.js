@@ -134,7 +134,9 @@ else if(loc == 'submit.php') {
 							trNum.appendChild(tdI);
 						}
 						table.appendChild(trNum);
-						for(var key in responses) {
+						for(var index = 0; index < submissionLinks.length; ++index) {
+							var key = /&([^]*)$/.exec(submissionLinks[index]);
+							key = key[1];
 							//generate Colors
 							var trColor = document.createElement('tr');
 							var thName = document.createElement('th');
