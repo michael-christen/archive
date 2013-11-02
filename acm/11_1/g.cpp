@@ -6,7 +6,7 @@
 
    * Creation Date : 01-11-2013
 
-   * Last Modified : Fri 01 Nov 2013 08:12:42 PM EDT
+   * Last Modified : Fri 01 Nov 2013 08:18:51 PM EDT
 
    * Created By : Michael Christen
 
@@ -23,7 +23,7 @@ int main() {
 
     cin >> v >> o >> m;
     while(v || o || m) {
-	vector<vector<int> > board(100,vector<int>(100,0));
+	vector<vector<int> > board(110,vector<int>(110,0));
 	vector<pair<int,int> > vampires;
 	vector<vector<int> > vampEmb(v,vector<int>());
 	//Setup vampires
