@@ -1,5 +1,5 @@
 function matchTests(txt) {
-	var re = /-{25} (\d+) -{25}\n(perfect!|pager failed|student external pager generated incorrect output)/g;
+	var re = /-{25} (\d+) -{25}\n(perfect!|file server generated incorrect output|file server used too much memory|file server failed|file server caused test case to exit with non-zero status)/g;
 	var match;
 	var arr = new Array();
 	while(match = re.exec(txt))
@@ -45,7 +45,7 @@ if(loc == 'viewSubmission.php') {
 			if(arr[i] == 'perfect!') {
 				statusColor = 'green';
 			}
-			else if(arr[i] == 'pager failed') {
+			else if(arr[i] == 'file server failed') {
 				statusColor = 'orange';
 			}
 			else {
@@ -68,7 +68,7 @@ if(loc == 'viewSubmission.php') {
 			if(arr[i] == 'perfect!') {
 				statusColor = 'green';
 			}
-			else if(arr[i] == 'pager failed') {
+			else if(arr[i] == 'file server failed') {
 				statusColor = 'orange';
 			}
 			else {
@@ -149,7 +149,8 @@ else if(loc == 'submit.php') {
 								if(arr[i] == 'perfect!') {
 									statusColor = 'green';
 								}
-								else if(arr[i] == 'pager failed') {
+								else
+								    if(arr[i] == 'file server failed') {
 									statusColor = 'orange';
 								}
 								else {
