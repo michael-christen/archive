@@ -7,13 +7,26 @@
 
 #include "Loader.h"
 
-USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface = { .Config = {
-		.ControlInterfaceNumber = 0, .DataINEndpoint = { .Address =
-				CDC_TX_EPADDR, .Size = CDC_TXRX_EPSIZE, .Banks = 1, },
-		.DataOUTEndpoint = { .Address = CDC_RX_EPADDR, .Size = CDC_TXRX_EPSIZE,
-				.Banks = 1, }, .NotificationEndpoint = { .Address =
-				CDC_NOTIFICATION_EPADDR, .Size = CDC_NOTIFICATION_EPSIZE,
-				.Banks = 1, }, }, };
+USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface = { 
+    .Config = {
+		.ControlInterfaceNumber = 0, 
+		.DataINEndpoint = { 
+		    .Address = CDC_TX_EPADDR, 
+		    .Size = CDC_TXRX_EPSIZE, 
+		    .Banks = 1, 
+		},
+		.DataOUTEndpoint = { 
+		    .Address = CDC_RX_EPADDR, 
+		    .Size = CDC_TXRX_EPSIZE, 
+		    .Banks = 1, 
+		}, 
+		.NotificationEndpoint = { 
+		    .Address = CDC_NOTIFICATION_EPADDR, 
+		    .Size = CDC_NOTIFICATION_EPSIZE, 
+		    .Banks = 1, 
+		}, 
+    }, 
+};
 
 typedef enum {
 	IDLE,
@@ -38,6 +51,9 @@ uint8_t adcPort = 0x0F;
 volatile uint8_t convPort = 0x0F;
 
 int main(void) {
+    	//Takes care of low level hw stuff
+    	//like initializing USB and setting
+    	//certain avr stuff
 	setupHardware();
 
 	GlobalInterruptEnable();
@@ -46,10 +62,13 @@ int main(void) {
 	initPostLoad();
 
 	while (1) {
-		loaderTask();
+	    //Handles fpga stuff as well as 
+	    //Flash, when gets to wait state, finishes being called
+	    loaderTask();
 
-		CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
-		USB_USBTask();
+	    //This handles USB Communication
+	    CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
+	    USB_USBTask();
 	}
 	return 0;
 }
@@ -166,147 +185,147 @@ void uartTask() {
 }
 
 void loaderTask() {
-	static loaderState_t state = IDLE;
-	static int8_t destination;
-	static int8_t verify;
-	static uint32_t byteCount;
-	static uint32_t transferSize;
+    static loaderState_t state = IDLE;
+    static int8_t destination;
+    static int8_t verify;
+    static uint32_t byteCount;
+    static uint32_t transferSize;
 
-	int16_t w;
-	uint8_t byte;
+    int16_t w;
+    uint8_t byte;
 
-	switch (taskState) {
+    switch (taskState) {
 	case WAIT:
-		break;
+	    break;
 	case START_LOAD:
-		disablePostLoad();
-		taskState = LOAD;
-		state = IDLE;
-		break;
+	    disablePostLoad();
+	    taskState = LOAD;
+	    state = IDLE;
+	    break;
 	case LOAD:
-		w = CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
-		byte = (uint8_t) w;
-		if (w >= 0) {
-			switch (state) {
-			case IDLE:
-				byteCount = 0;
-				transferSize = 0;
-				if (byte == 'F') { // write to flash
-					destination = 0;
-					verify = 0;
-					state = READ_SIZE;
-					CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'R');
-				}
-				if (byte == 'V') { // write to flash and verify
-					destination = 0;
-					verify = 1;
-					state = READ_SIZE;
-					CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'R');
-				}
-				if (byte == 'R') { // write to RAM
-					destination = 1;
-					state = READ_SIZE;
-					CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'R');
-				}
-				if (byte == 'E') { //erase
-					eraseFlash();
-					CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'D');
-				}
-				break;
-			case READ_SIZE:
-				transferSize |= ((uint32_t) byte << (byteCount++ * 8));
-				if (byteCount > 3) {
-					byteCount = 0;
-					if (destination) {
-						state = WRITE_TO_FPGA;
-						initLoad();
-						startLoad();
-					} else {
-						state = WRITE_TO_FLASH;
-						eraseFlash();
-					}
-					CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'O');
-				}
-				break;
-			case WRITE_TO_FLASH:
-				// we can only use the batch write for even addresses
-				// so address 5 is written as a single byte
-				if (byteCount == 0)
-					writeByteFlash(5, byte);
-
-				uint8_t buffIdx = (byteCount++ - 1) % 256;
-				loadBuffer[buffIdx] = byte;
-
-				if (buffIdx == 255 && byteCount != 0)
-					writeFlash(byteCount + 5 - 256, loadBuffer, 256);
-
-				if (byteCount == transferSize) {
-
-					if (buffIdx != 255)
-						writeFlash(byteCount + 5 - (buffIdx + 1), loadBuffer,
-								buffIdx + 1);
-
-					_delay_us(50);
-					uint32_t size = byteCount + 5;
-					for (uint8_t k = 0; k < 4; k++) {
-						writeByteFlash(k + 1, (size >> (k * 8)) & 0xFF);
-						_delay_us(50);
-					}
-					_delay_us(50);
-					writeByteFlash(0, 0xAA);
-					CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'D');
-					if (verify) {
-						state = VERIFY_FLASH;
-					} else {
-						state = LOAD_FROM_FLASH;
-					}
-				}
-				break;
-			case WRITE_TO_FPGA:
-				sendByte(byte);
-				if (++byteCount == transferSize) {
-					sendExtraClocks();
-					state = IDLE;
-					taskState = SERVICE;
-					initPostLoad();
-					CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'D');
-				}
-				break;
-			case VERIFY_FLASH:
-				if (byte == 'S') {
-					byteCount += 5;
-					for (uint32_t k = 0; k < byteCount; k += 256) {
-						uint16_t s;
-						if (k + 256 <= byteCount) {
-							s = 256;
-						} else {
-							s = byteCount - k;
-						}
-						readFlash(loadBuffer, k, s);
-						CDC_Device_SendData(&VirtualSerial_CDC_Interface,
-								(uint8_t*) loadBuffer, s);
-					}
-					state = LOAD_FROM_FLASH;
-				}
-				break;
-			case LOAD_FROM_FLASH:
-				if (byte == 'L') {
-					loadFromFlash();
-					CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'D');
-					state = IDLE;
-					taskState = SERVICE;
-					initPostLoad();
-				}
-				break;
+	    w = CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
+	    byte = (uint8_t) w;
+	    if (w >= 0) {
+		switch (state) {
+		    case IDLE:
+			byteCount = 0;
+			transferSize = 0;
+			if (byte == 'F') { // write to flash
+			    destination = 0;
+			    verify = 0;
+			    state = READ_SIZE;
+			    CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'R');
 			}
-		}
+			if (byte == 'V') { // write to flash and verify
+			    destination = 0;
+			    verify = 1;
+			    state = READ_SIZE;
+			    CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'R');
+			}
+			if (byte == 'R') { // write to RAM
+			    destination = 1;
+			    state = READ_SIZE;
+			    CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'R');
+			}
+			if (byte == 'E') { //erase
+			    eraseFlash();
+			    CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'D');
+			}
+			break;
+		    case READ_SIZE:
+			transferSize |= ((uint32_t) byte << (byteCount++ * 8));
+			if (byteCount > 3) {
+			    byteCount = 0;
+			    if (destination) {
+				state = WRITE_TO_FPGA;
+				initLoad();
+				startLoad();
+			    } else {
+				state = WRITE_TO_FLASH;
+				eraseFlash();
+			    }
+			    CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'O');
+			}
+			break;
+		    case WRITE_TO_FLASH:
+			// we can only use the batch write for even addresses
+			// so address 5 is written as a single byte
+			if (byteCount == 0)
+			    writeByteFlash(5, byte);
 
-		break;
+			uint8_t buffIdx = (byteCount++ - 1) % 256;
+			loadBuffer[buffIdx] = byte;
+
+			if (buffIdx == 255 && byteCount != 0)
+			    writeFlash(byteCount + 5 - 256, loadBuffer, 256);
+
+			if (byteCount == transferSize) {
+
+			    if (buffIdx != 255)
+				writeFlash(byteCount + 5 - (buffIdx + 1), loadBuffer,
+					buffIdx + 1);
+
+			    _delay_us(50);
+			    uint32_t size = byteCount + 5;
+			    for (uint8_t k = 0; k < 4; k++) {
+				writeByteFlash(k + 1, (size >> (k * 8)) & 0xFF);
+				_delay_us(50);
+			    }
+			    _delay_us(50);
+			    writeByteFlash(0, 0xAA);
+			    CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'D');
+			    if (verify) {
+				state = VERIFY_FLASH;
+			    } else {
+				state = LOAD_FROM_FLASH;
+			    }
+			}
+			break;
+		    case WRITE_TO_FPGA:
+			sendByte(byte);
+			if (++byteCount == transferSize) {
+			    sendExtraClocks();
+			    state = IDLE;
+			    taskState = SERVICE;
+			    initPostLoad();
+			    CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'D');
+			}
+			break;
+		    case VERIFY_FLASH:
+			if (byte == 'S') {
+			    byteCount += 5;
+			    for (uint32_t k = 0; k < byteCount; k += 256) {
+				uint16_t s;
+				if (k + 256 <= byteCount) {
+				    s = 256;
+				} else {
+				    s = byteCount - k;
+				}
+				readFlash(loadBuffer, k, s);
+				CDC_Device_SendData(&VirtualSerial_CDC_Interface,
+					(uint8_t*) loadBuffer, s);
+			    }
+			    state = LOAD_FROM_FLASH;
+			}
+			break;
+		    case LOAD_FROM_FLASH:
+			if (byte == 'L') {
+			    loadFromFlash();
+			    CDC_Device_SendByte(&VirtualSerial_CDC_Interface, 'D');
+			    state = IDLE;
+			    taskState = SERVICE;
+			    initPostLoad();
+			}
+			break;
+		}
+	    }
+
+	    break;
 	case SERVICE:
-		uartTask();
-		adcTask();
-		break;
-	}
+	    uartTask();
+	    adcTask();
+	    break;
+    }
 }
 
 void setupTimers() {
@@ -317,6 +336,7 @@ void setupTimers() {
 void setupHardware() {
 	/* Disable watchdog if enabled by bootloader/fuses */
 	MCUSR &= ~(1 << WDRF);
+	//??? where is this implemented
 	wdt_disable();
 
 	/* Disable clock division */
