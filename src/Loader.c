@@ -504,6 +504,9 @@ void EVENT_CDC_Device_ControLineStateChanged(
 	}
 }
 
+//INT2 or RX interrupt, could possibly use this to 
+//send interrupt to processor
+//RX complete, not INT2, although INT2 used in rx assuming
 ISR(USART1_RX_vect) {
 	RingBuffer_Insert(&ringBuffer, UDR1 );
 	if (ringBuffer.Count > 100)
@@ -514,6 +517,7 @@ ISR(USART1_RX_vect) {
 		serailRXDisable();
 }
 
+//PCINT[4-6] possibly
 ISR(ADC_vect) {
 	RingBuffer_Insert(&adcRingBuffer, ADCL );
 	RingBuffer_Insert(&adcRingBuffer, (convPort << 4) | ADCH );
