@@ -133,6 +133,17 @@ void adcTask() {
 }
 
 void serialRXEnable() {
+	//UCSR1B is mapped to _SFR_MEM8(0xC9)
+	//apparently it is _MMIO_BYTE of the byte
+	//We could use this for MMIO, if we had a 
+	//pin mapped to the FPGA that wasn't for
+	//Something else
+	//addr. 0xC9, 
+	//this is 
+	//in /usr/lib/avr/include/avr/iom32u4.h
+	//RXEN1 = 4, so this sets bit 4 or RXEN1
+	//this enables PD2, aka int2, aka rxd1
+	//Info can be found on page 79 of the datasheet
 	UCSR1B |= (1 << RXEN1);
 }
 
@@ -145,6 +156,7 @@ void uartTask() {
 			VirtualSerial_CDC_Interface.Config.DataINEndpoint.Address);
 	if (Endpoint_IsReadWriteAllowed()) { // does the data have somewhere to go?
 		uint16_t ct = RingBuffer_GetCount(&ringBuffer);
+		//Send receive data serially to computer over USB
 		if (ct > 0) {
 			if (ringBuffer.Out + ct <= ringBuffer.End) {
 				CDC_Device_SendData(&VirtualSerial_CDC_Interface,
@@ -171,13 +183,15 @@ void uartTask() {
 
 			SetGlobalInterruptMask(CurrentGlobalInt);
 		}
-
+		//???Wouldn't this be 0 no matter what?
 		if (RingBuffer_GetCount(&ringBuffer) < 10) {
 			SET(TX_BUSY, LOW);
 			serialRXEnable();
 		}
 	}
 
+	//Receive serial data from CPU over USB and send one 
+	//byte at a time to FPGA with Serial_SendByte
 	int16_t w;
 	while ((w = CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface)) >= 0) {
 		Serial_SendByte(w);
@@ -506,8 +520,9 @@ void EVENT_CDC_Device_ControLineStateChanged(
 
 //INT2 or RX interrupt, could possibly use this to 
 //send interrupt to processor
-//RX complete, not INT2, although INT2 used in rx assuming
+//RX complete, not INT2
 ISR(USART1_RX_vect) {
+	//UDR1 is the USART1 I/O Data register
 	RingBuffer_Insert(&ringBuffer, UDR1 );
 	if (ringBuffer.Count > 100)
 		SET(TX_BUSY, HIGH);
