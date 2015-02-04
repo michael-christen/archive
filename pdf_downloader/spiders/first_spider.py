@@ -21,6 +21,8 @@ class FirstSpiderSpider(scrapy.Spider):
 
 	def parse(self, response):
 		link_prefix = parsed_url.scheme + '://' + parsed_url.netloc
+		if not link_prefix.endswith('/'):
+			link_prefix += '/'
 		for l in response.xpath('//a/@href').re('(.+\.pdf)'):
 			item = PdfDownloaderItem()
 			item['link'] =  link_prefix + l
@@ -28,6 +30,9 @@ class FirstSpiderSpider(scrapy.Spider):
 			if m:
 				item['name'] = m.group(1)
 				item['local_location'] = target.TARGET_DEST+'/'+m.group(1)
-				d = urllib.urlretrieve(item['link'],filename=item['local_location'])
-				yield item
+				try:
+					d = urllib.urlretrieve(item['link'],filename=item['local_location'])
+					yield item
+				except IOError:
+					print "Couldn't save: ", item
 	pass
