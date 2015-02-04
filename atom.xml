@@ -4,7 +4,7 @@
   <subtitle><![CDATA[And the Problems I Encountered]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://karatekid.github.io/"/>
-  <updated>2014-11-29T01:27:25.864Z</updated>
+  <updated>2015-02-04T21:10:31.974Z</updated>
   <id>http://karatekid.github.io/</id>
   
   <author>
@@ -19,7 +19,7 @@
     <link href="http://karatekid.github.io/2014/11/28/First-Post/"/>
     <id>http://karatekid.github.io/2014/11/28/First-Post/</id>
     <published>2014-11-29T00:38:16.000Z</published>
-    <updated>2014-11-29T01:27:20.000Z</updated>
+    <updated>2015-02-04T20:56:20.000Z</updated>
     <content type="html"><![CDATA[<p>This is my very first blog post using <a href="http://hexo.io/" target="_blank" rel="external">Hexo</a>, and<br>hosted on github. It details using the STM32F1 / STM32F4 processors as<br>I2C slaves, and modifying the OpenPilot source code to be used as an<br>I2C slave flight controller.</p>
 <h2 id="Slave_transactions">Slave transactions</h2>
 <p>I2C has 4 operating modes:</p>
