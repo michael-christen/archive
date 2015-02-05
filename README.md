@@ -11,3 +11,4 @@ line arguments:
 * progress bar / display how many you have
 * don't save files you already have
   * nice if could check file hash for changes
+* use environment variables instead of target.py
