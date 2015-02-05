@@ -20,19 +20,21 @@ class FirstSpiderSpider(scrapy.Spider):
 	)
 
 	def parse(self, response):
-		link_prefix = parsed_url.scheme + '://' + parsed_url.netloc
-		if not link_prefix.endswith('/'):
-			link_prefix += '/'
-		for l in response.xpath('//a/@href').re('(.+\.pdf)'):
+		#response is pdf document
+		m = re.search('([^\/]+\.pdf)$',response.url)
+		if m:
 			item = PdfDownloaderItem()
-			item['link'] =  link_prefix + l
-			m = re.search('([^\/]+\.pdf)$',l)
-			if m:
-				item['name'] = m.group(1)
-				item['local_location'] = target.TARGET_DEST+'/'+m.group(1)
-				try:
-					d = urllib.urlretrieve(item['link'],filename=item['local_location'])
-					yield item
-				except IOError:
-					print "Couldn't save: ", item
-	pass
+			item['link'] = response.url
+			item['name'] = m.group(1)
+			item['local_location'] = target.TARGET_DEST+'/'+ item['name']
+			#save actual file
+			with open(item['local_location'], 'w') as f:
+				f.write(response.body)
+			yield item
+		#have pdf links, so crawl again to save
+		else:
+			for url in response.xpath('//a/@href').re('(.+\.pdf)'):
+				new_url = urlparse.urljoin(response.url,url)
+				yield scrapy.Request(new_url, callback=self.parse)
+		pass
+
