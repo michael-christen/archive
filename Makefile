@@ -1,6 +1,6 @@
 #Compiler Directives
 CXX=g++
-CPPFLAGS=
+CPPFLAGS=-std=c++11
 LDFLAGS=
 LIBS=#-lsomething
 #Directories
@@ -9,10 +9,17 @@ LDIR=lib
 ODIR=obj
 #Files
 BINFILE= slide-solve
+TESTFILE= tester
+MAIN_SRC= solve.cpp
+TEST_SRC= test.cpp
 SRC= board.cpp \
-	 solve.cpp
+
 _OBJ=$(SRC:.cpp=.o)
 OBJ=$(patsubst %,$(ODIR)/%,$(_OBJ))
+_MAIN_OBJ=$(MAIN_SRC:.cpp=.o)
+MAIN_OBJ=$(patsubst %,$(ODIR)/%,$(_MAIN_OBJ))
+_TEST_OBJ=$(TEST_SRC:.cpp=.o)
+TEST_OBJ=$(patsubst %,$(ODIR)/%,$(_TEST_OBJ))
 _DEPS= board.h
 DEPS=$(patsubst %,$(IDIR)/%,$(_DEPS))
 
@@ -31,6 +38,7 @@ endif
 .PHONY: all help clean
 
 all: $(BINFILE)
+test: $(TESTFILE)
 help:
 	$(E)
 	$(E)Helpful Comments
@@ -41,7 +49,11 @@ $(ODIR)/%.o: $(LDIR)/%.cpp $(DEPS)
 	$(Q)if [ ! -d `dirname $@` ]; then mkdir -p `dirname $@`; fi
 	$(Q)$(CXX) -o $@ -c $< $(CPPFLAGS) -I$(IDIR)
 
-$(BINFILE):	$(OBJ) $(DEPS)
+$(BINFILE):	$(OBJ) $(MAIN_OBJ) $(DEPS)
+	$(E)Linking $@
+	$(Q)$(CXX) -o $@ $^ $(CPPFLAGS) $(LIBS) $(LDFLAGS)
+
+$(TESTFILE): $(OBJ) $(TEST_OBJ) $(DEPS)
 	$(E)Linking $@
 	$(Q)$(CXX) -o $@ $^ $(CPPFLAGS) $(LIBS) $(LDFLAGS)
 

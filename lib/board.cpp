@@ -10,11 +10,14 @@
 
  _._._._._._._._._._._._._._._._._._._._._.*/
 #include<algorithm>
+#include<iostream>
 
 #include "board.h"
 
 Board::Board()
-	:layout("01234567_"), pos(9){
+	:pos(8){
+		layout = new char[10];
+		strcpy(layout, "01234567_"); 
 		 movesMade = std::vector<Move>();
 }
 
@@ -28,6 +31,10 @@ Board::Board(char * initString){
 	//TODO: Verify good input
 }
 
+Board::~Board() {
+	delete [] layout;
+}
+
 bool Board::operator ==(const Board &b) {
 	return strcmp(b.layout,layout) == 0;
 }
@@ -35,7 +42,7 @@ bool Board::operator ==(const Board &b) {
 std::string Board::serialize() {
 	return std::string(layout);
 }
-std::string Board::print() {
+void Board::print() {
 	std::string s = "";
 	int x = 0, y = 0;
 	for(int i = 0; i < 9; ++i) {
@@ -44,7 +51,8 @@ std::string Board::print() {
 		}
 		s += layout[i];
 	}
-	return s;
+	s += "\n\n";
+	std::cout << s;
 }
 
 std::vector<Board::Move> Board::getPossibleMoves() {
@@ -61,17 +69,45 @@ std::vector<Board::Move> Board::getPossibleMoves() {
 	return moves;
 }
 
-void Board::makeMove(Move m) {
-	//TODO: check for invalid moves
-	if(m == U) {
-		posSwap(pos-3);
-	} else if(m == D) {
-		posSwap(pos+3);
-	} else if(m == L) {
-		posSwap(pos-1);
-	} else if(m == R) {
-		posSwap(pos+1);
+void Board::move(Move m) {
+	int v = pos + MoveVals[m];
+	if(v < 0 || v > 8) {
+		throw InvalidMoveError();
 	}
+	posSwap(v);
+	movesMade.push_back(m);
+}
+
+bool Board::undoLastMove() {
+	if(movesMade.empty()) {
+		return false;
+	} else {
+		Move m = movesMade.back();
+		posSwap(pos - MoveVals[m]);
+		movesMade.pop_back();
+		return true;
+	}
+}
+
+std::vector<Board::Move> Board::getMovesMade() {
+	return movesMade;
+}
+
+std::string Board::serializeMovesMade() {
+	std::string s = "";
+	bool first = true;
+	for(auto it = movesMade.begin(); it != movesMade.end(); it++) {
+		if(!first) {
+			s += ' ';
+		}
+		s += MoveNames[*it];
+		first = false;
+	}
+	return s;
+}
+
+int getPositon() {
+	return pos;
 }
 
 void Board::posSwap(int newPos) {
@@ -82,3 +118,4 @@ void Board::posSwap(int newPos) {
 }
 
 const char * const Board::MoveNames[] = {"U", "R", "D", "L"}; 
+int const Board::MoveVals[] = {-3, 1, 3, -1}; 
