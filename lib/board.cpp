@@ -14,21 +14,37 @@
 
 #include "board.h"
 
-Board::Board()
-	:pos(8){
+void Board::init() {
 		layout = new char[10];
 		strcpy(layout, "01234567_"); 
-		 movesMade = std::vector<Move>();
+		movesMade = std::vector<Move>();
+}
+
+Board::Board()
+	:pos(8){
+	init();
 }
 
 Board::Board(char * initString){
-	Board();
-	layout = initString;
+	init();
+	strcpy(layout,initString);
+	/*
+	for(int i = 0; i < 9; ++i) {
+		layout[i] = initString[i];
+	}
+	*/
 	pos = strstr(layout, "_") - layout;
 	if(pos < 0) { 
 		throw InvalidBoardError();
 	}
 	//TODO: Verify good input
+}
+
+Board::Board(const Board &b) {
+	init();
+	strcpy(layout,b.layout);
+	pos = b.pos;
+	movesMade = b.movesMade;
 }
 
 Board::~Board() {
@@ -37,6 +53,14 @@ Board::~Board() {
 
 bool Board::operator ==(const Board &b) {
 	return strcmp(b.layout,layout) == 0;
+}
+
+
+Board & Board::operator =(const Board &b) {
+	strcpy(layout,b.layout);
+	pos = b.pos;
+	movesMade = b.movesMade;
+	return *this;
 }
 
 std::string Board::serialize() {
@@ -106,7 +130,7 @@ std::string Board::serializeMovesMade() {
 	return s;
 }
 
-int getPositon() {
+int Board::getPosition() {
 	return pos;
 }
 

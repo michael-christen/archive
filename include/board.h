@@ -43,5 +43,6 @@ class Board {
 		std::vector<Move> movesMade;
 
 		void posSwap(int newPos);
+		void init();
 };
 #endif
