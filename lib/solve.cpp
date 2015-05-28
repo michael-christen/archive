@@ -11,22 +11,23 @@
  _._._._._._._._._._._._._._._._._._._._._.*/
 
 #include<vector>
-#include<set>
+#include<map>
 #include<iostream>
 #include<string>
 #include<getopt.h>
 
 #include "board.h"
 
-Board solveBDepth(Board b, const Board & correct, int curDepth, int targetDepth, std::set<std::string> &boardSeen) {
+Board solveBDepth(Board b, const Board & correct, int curDepth, int targetDepth, std::map<std::string,int> &boardSeen) {
 	if(b == correct || curDepth > targetDepth) {
 		return b;
 	}
 	std::vector<Board::Move> moves = b.getPossibleMoves();
 	for(auto it = moves.begin(); it != moves.end(); ++it) {
 		b.move(*it);
-		if(boardSeen.find(b.serialize()) == boardSeen.end()) {
-			boardSeen.insert(b.serialize());
+		if(boardSeen.find(b.serialize()) == boardSeen.end() ||
+				boardSeen[b.serialize()] > curDepth) {
+			boardSeen[b.serialize()] = curDepth;
 			Board newB = solveBDepth(b,correct,curDepth+1,targetDepth,boardSeen);
 			if(newB == correct) {
 				return newB;
@@ -40,11 +41,11 @@ Board solveBDepth(Board b, const Board & correct, int curDepth, int targetDepth,
 
 Board solveBoard(Board b, const Board & correct) {
 	int depth = 0;
-	std::set<std::string> boardSeen = std::set<std::string>();
+	std::map<std::string,int> boardSeen = std::map<std::string,int>();
 	//IDDFS search
 	while(!(b == correct)) {
 		depth ++;
-		boardSeen.insert(b.serialize());
+		boardSeen[b.serialize()] = depth;
 		b = solveBDepth(b,correct,0,depth,boardSeen);
 		boardSeen.clear();
 		std::cerr << depth << std::endl;
