@@ -11,21 +11,26 @@
  _._._._._._._._._._._._._._._._._._._._._.*/
 
 #include<vector>
+#include<set>
 #include<iostream>
 #include<string>
 #include<getopt.h>
 
 #include "board.h"
 
-Board solveBDepth(Board b, const Board & correct, int curDepth, int targetDepth) {
+Board solveBDepth(Board b, const Board & correct, int curDepth, int targetDepth, std::set<std::string> &boardSeen) {
 	if(b == correct || curDepth > targetDepth) {
 		return b;
 	}
 	std::vector<Board::Move> moves = b.getPossibleMoves();
 	for(auto it = moves.begin(); it != moves.end(); ++it) {
 		b.move(*it);
-		if(solveBDepth(b,correct,curDepth+1,targetDepth) == correct) {
-			return b;
+		if(boardSeen.find(b.serialize()) == boardSeen.end()) {
+			boardSeen.insert(b.serialize());
+			Board newB = solveBDepth(b,correct,curDepth+1,targetDepth,boardSeen);
+			if(newB == correct) {
+				return newB;
+			}
 		}
 		//Recursive call
 		b.undoLastMove();
@@ -35,10 +40,13 @@ Board solveBDepth(Board b, const Board & correct, int curDepth, int targetDepth)
 
 Board solveBoard(Board b, const Board & correct) {
 	int depth = 0;
+	std::set<std::string> boardSeen = std::set<std::string>();
 	//IDDFS search
 	while(!(b == correct)) {
 		depth ++;
-		b = solveBDepth(b,correct,0,depth);
+		boardSeen.insert(b.serialize());
+		b = solveBDepth(b,correct,0,depth,boardSeen);
+		boardSeen.clear();
 		std::cerr << depth << std::endl;
 	}
 	return b;
@@ -75,7 +83,7 @@ int main(int argc, char **argv) {
 	}while(opt != -1);
 	if(solve) {
 		b = solveBoard(b, Board("01234567_"));
-		b.print();
+		std::cout << b.serializeMovesMade() << std::endl;
 	}
 	return 0;
 }

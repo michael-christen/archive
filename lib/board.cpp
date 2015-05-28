@@ -44,7 +44,7 @@ Board::Board(const Board &b) {
 	init();
 	strcpy(layout,b.layout);
 	pos = b.pos;
-	movesMade = b.movesMade;
+	movesMade = std::vector<Move>(b.movesMade);
 }
 
 Board::~Board() {
@@ -59,7 +59,7 @@ bool Board::operator ==(const Board &b) {
 Board & Board::operator =(const Board &b) {
 	strcpy(layout,b.layout);
 	pos = b.pos;
-	movesMade = b.movesMade;
+	movesMade = std::vector<Move>(b.movesMade);
 	return *this;
 }
 
