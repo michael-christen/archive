@@ -60,35 +60,39 @@ define(["lib/d3.min"], function(d3) {
         .attr("r", 5)
         .style("stroke", "black")
         .style("fill", "white");
+    // Draw line
+    var line = svg.append("line")
+        .attr("id", "line")
+        .attr("x1", center.x)
+        .attr("y1", center.y)
+        .attr("x2", center.x)
+        .attr("y2", center.y + radius)
+        .style("stroke-width", 1)
+        .style("stroke", "black");
+    // Draw mass
+    var mass = svg.append("circle")
+        .attr("id", "mass")
+        .attr("cx", center.x)
+        .attr("cy", center.y + radius)
+        .attr("r", 10)
+        .style("fill", "steelblue");
 
     var update = function(theta) {
         // Use simulations frame 0 = bottom, 90 = left, 180 = top, 270 = right
         theta -= 90;
         // Change line and mass dependent on theta
         var point = {
-            x: center.x + radius * Math.cos(theta*Math.PI/180),
+            // Our model changes direction of +theta
+            x: center.x - radius * Math.cos(theta*Math.PI/180),
             // Subtract because down is + in SVG
             y: center.y - radius * Math.sin(theta*Math.PI/180)
         };
-        // Get rid of any old masses or lines
-        svg.select("#mass").remove();
-        svg.select("#line").remove();
-        // Draw new line
-        var line = svg.append("line")
-            .attr("id", "line")
-            .attr("x1", center.x)
-            .attr("y1", center.y)
-            .attr("x2", point.x)
-            .attr("y2", point.y)
-            .style("stroke-width", 1)
-            .style("stroke", "black");
+        // Update line
+        line.attr("x2", point.x)
+            .attr("y2", point.y);
         // Draw new mass
-        var mass = svg.append("circle")
-            .attr("id", "mass")
-            .attr("cx", point.x)
-            .attr("cy", point.y)
-            .attr("r", 10)
-            .style("fill", "steelblue");
+        mass.attr("cx", point.x)
+            .attr("cy", point.y);
         /*
             x.domain([
                     d3.min(data, function(d, i) { return i; }),

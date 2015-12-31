@@ -28,15 +28,38 @@ var simParams = ko.mapping.fromJS(getDefaultParameters(), SimulatorKO.SimulatorM
 ko.applyBindings(simParams, document.getElementById('simulator-div'));
 
 // Functions that use the struct
-
-function renderModel(model) {
-    graph.update(model.theta);
+var sim_index = 0;
+var sim_step  = null;
+var sim_steps = null;
+var sim_frame = null;
+var sim_start = null;
+function renderModel(timestamp) {
+    if(!sim_start) {
+        sim_start = timestamp;
+        sim_step = sim_steps[sim_index];
+    }
+    var t_diff = (timestamp - sim_start)/1000.0;
+    // Find closest step.time that is below t_diff
+    if(sim_index < sim_steps.length - 1) {
+        for(var i = 1; i + sim_index < sim_steps.length; ++i) {
+            var next_step = sim_steps[sim_index + i];
+            // If have a valid step after time diff 
+            if(next_step.time > t_diff) {
+                sim_index += i - 1;
+                sim_step = sim_steps[sim_index];
+                graph.update(sim_step.model.theta);
+                sim_frame = window.requestAnimationFrame(renderModel);
+                break;
+            }
+        }
+    }
 }
 
 function runSimulation(simulated_steps) {
-    for(var i = 0; i < simulated_steps.length; ++i) {
-        renderModel(simulated_steps[i].model);
-    }
+    sim_index = 0;
+    sim_steps = simulated_steps;
+    sim_start = null;
+    sim_frame = window.requestAnimationFrame(renderModel);
 }
 
 

@@ -7,6 +7,9 @@
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/THttpServer.h>
 
+#include <math.h>
+#define PI 3.14159265
+
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
@@ -22,7 +25,34 @@ class PID_SimulatorHandler : virtual public PID_SimulatorIf {
 
   void simulate(std::vector< ::Simulator_Product> & _return, const  ::Simulator_Parameters& params) {
     // Your implementation goes here
-    LOG(DEBUG) << "Simulate started";
+    LOG(DEBUG) << "Simulation started";
+
+    // Setup simulation
+    ::Model state = params.model;
+    state.alpha = 0;
+    ::Simulator_Product temp_result;
+    double gravity_force = params.constants.g * params.constants.mass;
+    double denominator = params.constants.mass * params.constants.radius;
+    double dt = params.constants.dt;
+    // Run simulation
+    for(double time = 0.0; time <= params.constants.max_time; time += dt) {
+        // Record the simulated step
+        temp_result.time = time;
+        temp_result.model = state;
+        _return.push_back(temp_result);
+        // Calculate the new state
+        double force = 0.0;  // TODO: perform PID control
+        // TODO: double check ordering of simulation
+        state.theta += state.omega*dt;
+        state.omega += state.alpha*dt;
+        state.alpha = (force - gravity_force * sin(state.theta * PI / 180.0)) / denominator;
+    }
+    // Record the simulated step
+    temp_result.time = params.constants.max_time;
+    temp_result.model = state;
+    _return.push_back(temp_result);
+
+    LOG(DEBUG) << "Simulation ended";
   }
 
 };
