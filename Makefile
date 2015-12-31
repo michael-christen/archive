@@ -17,9 +17,9 @@ INCLUDE_PATHS= -I$(IDIR) \
 #Files
 # Call thrift with the MAIN_IDL
 # TODO: Change these to your own thrift files 
-_MAIN_IDL= ExampleService.thrift
+_MAIN_IDL= PID_Simulator.thrift
 MAIN_IDL=$(patsubst %,$(IDL_DIR)/%,$(_MAIN_IDL))
-_IDL= ExampleStruct.thrift \
+_IDL= types.thrift \
 	  $(_MAIN_IDL)
 IDL=$(patsubst %,$(IDL_DIR)/%,$(_IDL))
 _GEN_SRC_CONST=$(_IDL:.thrift=_constants.cpp)
