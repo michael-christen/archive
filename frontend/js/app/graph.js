@@ -1,9 +1,15 @@
 // Adapted from Line Chart example: http://bl.ocks.org/mbostock/3883245
 define(["lib/d3.min"], function(d3) {
     // Visuals
-    var margin = {top: 40, right: 30, bottom: 30, left: 50},
-        width  = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+    var margin = {top: 10, right: 10, bottom: 10, left: 10},
+        width  = 600 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom;
+    var center = {
+        x: width/2 + margin.left,
+        y: height/2 + margin.top
+    };
+    var radius = Math.min(width, height) / 2 - 10;
+    /*
     var x = d3.scale.linear()
         .range([0, width]);
     var linePadding = 10;
@@ -27,12 +33,13 @@ define(["lib/d3.min"], function(d3) {
     var line = d3.svg.line()
         .x(function(d, i) { return x(i); })
         .y(function(d) { return y(d); });
-
+    */
     // SVG Creation / update
     var svg = d3.select("#graph").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom);
 
+    /*
     // Axes
     var xAxisGraph = svg.append("g")
         .attr("class", "x axis")
@@ -40,20 +47,52 @@ define(["lib/d3.min"], function(d3) {
     var yAxisGraph = svg.append("g")
         .attr("class", "y axis")
         .attr("transform", "translate(" + margin.left + "," + (margin.top) + ")");
-
     // Lines
     var lineContainer = svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
         .attr("id", "lineContainer");
+    */
+    // Pivot circle
+    var pivotCircle = svg.append("circle")
+        .attr("id", "pivot")
+        .attr("cx", center.x)
+        .attr("cy", center.y)
+        .attr("r", 5)
+        .style("stroke", "black")
+        .style("fill", "white");
 
-    // Update lines w/ new data ie) fetch
-    // Data takes form of dictionary, channel is key and data array is value
-    // DataFreq is the frequency of the incoming data
-    var update = function(data) {
-        // Setup domain
-        x.domain([
-                d3.min(data, function(d, i) { return i; }),
-                d3.max(data, function(d, i) { return i; })
+    var update = function(theta) {
+        // Use simulations frame 0 = bottom, 90 = left, 180 = top, 270 = right
+        theta -= 90;
+        // Change line and mass dependent on theta
+        var point = {
+            x: center.x + radius * Math.cos(theta*Math.PI/180),
+            // Subtract because down is + in SVG
+            y: center.y - radius * Math.sin(theta*Math.PI/180)
+        };
+        // Get rid of any old masses or lines
+        svg.select("#mass").remove();
+        svg.select("#line").remove();
+        // Draw new line
+        var line = svg.append("line")
+            .attr("id", "line")
+            .attr("x1", center.x)
+            .attr("y1", center.y)
+            .attr("x2", point.x)
+            .attr("y2", point.y)
+            .style("stroke-width", 1)
+            .style("stroke", "black");
+        // Draw new mass
+        var mass = svg.append("circle")
+            .attr("id", "mass")
+            .attr("cx", point.x)
+            .attr("cy", point.y)
+            .attr("r", 10)
+            .style("fill", "steelblue");
+        /*
+            x.domain([
+                    d3.min(data, function(d, i) { return i; }),
+                    d3.max(data, function(d, i) { return i; })
                 ]);
         y.domain([
                 d3.min(data, function(d) { return d; }),
@@ -62,7 +101,6 @@ define(["lib/d3.min"], function(d3) {
         // Axis update
         xAxisGraph.call(xAxis);
         yAxisGraph.call(yAxis);
-
         // NOTE: Not following d3 methodology of update, enter, exit
         // Get rid of old path
         lineContainer.selectAll("path").remove();
@@ -71,6 +109,7 @@ define(["lib/d3.min"], function(d3) {
             .datum(data)
             .attr("class", "line")
             .attr("d", line);
+        */
     };
 
     function splitD3Transform(elt) {

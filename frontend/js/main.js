@@ -30,6 +30,7 @@ ko.applyBindings(simParams, document.getElementById('simulator-div'));
 // Functions that use the struct
 
 function renderModel(model) {
+    graph.update(model.theta);
 }
 
 function runSimulation(simulated_steps) {
@@ -54,4 +55,5 @@ function simulate() {
 // Register dom with functions
 $("#simulate-btn").click(simulate);
 
+graph.update(0);
 });
