@@ -20,7 +20,7 @@ class PID_SimulatorHandler : virtual public PID_SimulatorIf {
     // Your initialization goes here
   }
 
-  void simulate(std::vector< ::Simulator_Product> & _return, const  ::Simulator_Parameters& sim_params, const  ::PID& pid_params, const  ::Model& model) {
+  void simulate(std::vector< ::Simulator_Product> & _return, const  ::Simulator_Parameters& params) {
     // Your implementation goes here
     LOG(DEBUG) << "Simulate started";
   }

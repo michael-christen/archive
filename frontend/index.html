@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Title</title>
+  <title>PID Simulator</title>
 
   <!-- CSS Files -->
   <!-- External Libraries -->
@@ -21,16 +21,70 @@
 
 <body>
 <div class="container">
-  <div id="example-div">
+  <div id="simulator-div">
+    <div id="pid-input" class="row">
+      <div class="col-md-4">
+          <label>P</label>
+          <input type="text" data-bind="value: pid_values.p"/>
+      </div>
+      <div class="col-md-4">
+          <label>I</label>
+          <input type="text" data-bind="value: pid_values.i"/>
+      </div>
+      <div class="col-md-4">
+          <label>D</label>
+          <input type="text" data-bind="value: pid_values.d"/>
+      </div>
+    </div>
+
+    <div id="angle-input" class="row">
+      <div class="col-md-4">
+          <label>&theta;<sub>ic</sub></label>
+          <input type="text" data-bind="value: model.theta"/>
+      </div>
+      <div class="col-md-4">
+          <label>&omega;<sub>ic</sub></label>
+          <input type="text" data-bind="value: model.omega"/>
+      </div>
+      <div class="col-md-4">
+          <label>&omega;<sub>target</sub></label>
+          <input type="text" data-bind="value: desired_theta"/>
+      </div>
+    </div>
+
+    <div id="time-input" class="row">
+      <div class="col-md-4">
+          <label>dt</label>
+          <input type="text" data-bind="value: constants.dt"/>
+      </div>
+      <div class="col-md-4">
+          <label>dt<sub>pid</sub></label>
+          <input type="text" data-bind="value: constants.dt_pid"/>
+      </div>
+      <div class="col-md-4">
+          <label>T<sub>max</sub></label>
+          <input type="text" data-bind="value: constants.max_time"/>
+      </div>
+    </div>
+
+    <div id="physical-input" class="row">
+      <div class="col-md-4">
+          <label>g</label>
+          <input type="text" data-bind="value: constants.g"/>
+      </div>
+      <div class="col-md-4">
+          <label>r</label>
+          <input type="text" data-bind="value: constants.radius"/>
+      </div>
+      <div class="col-md-4">
+          <label>m</label>
+          <input type="text" data-bind="value: constants.mass"/>
+      </div>
+    </div>
+
     <div class="row">
       <div class="col-md-4">
-          <input type="text" data-bind="value: exampleField"/>
-      </div>
-      <div class="col-md-4">
-        <button id="set-btn" class="btn btn-primary">Set ExampleField</button>
-      </div>
-      <div class="col-md-4">
-        <button id="get-btn" class="btn btn-warning">Get ExampleField</button>
+        <button id="simulate-btn" class="btn btn-primary">Simulate</button>
       </div>
     </div>
     <div class="row">
@@ -51,9 +105,9 @@
 
 <!--Generated thrift js files
 TODO: Update w/ appropriate file names for generated JS-->
-<script src="gen-js/ExampleStruct_types.js"                                    type="text/javascript"></script>
-<script src="gen-js/ExampleService_types.js"                                   type="text/javascript"></script>
-<script src="gen-js/ExampleService.js"                                         type="text/javascript"></script>
+<script src="gen-js/types_types.js"                                            type="text/javascript"></script>
+<script src="gen-js/PID_Simulator_types.js"                                    type="text/javascript"></script>
+<script src="gen-js/PID_Simulator.js"                                          type="text/javascript"></script>
 
 <!-- Main js files -->
 <script src="js/lib/require.js" data-main="js/main"                            type="text/javascript"></script>

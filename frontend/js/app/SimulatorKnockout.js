@@ -1,6 +1,6 @@
 define(function() {
 // View Model
-function ExampleVM(data) {
+function SimulatorVM(data) {
     var self = this;
     // Thrift object
     ko.mapping.fromJS(data, {}, self);
@@ -8,14 +8,14 @@ function ExampleVM(data) {
 }
 
 // Mapping
-var ExampleMapping = {
+var SimulatorMapping = {
     create: function(options) {
-        return new ExampleVM(options.data);
+        return new SimulatorVM(options.data);
     }
 };
 
 // Interface
 return {
-    ExampleMapping: ExampleMapping
+    SimulatorMapping: SimulatorMapping
 };
 });
