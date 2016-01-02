@@ -9,6 +9,8 @@
 
 #include <math.h>
 #define PI 3.14159265
+#define D2R (PI / 180.0)
+#define R2D (180.0 / PI)
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -16,6 +18,7 @@ using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
 using boost::shared_ptr;
+
 
 class PID_SimulatorHandler : virtual public PID_SimulatorIf {
  public:
@@ -33,6 +36,7 @@ class PID_SimulatorHandler : virtual public PID_SimulatorIf {
     ::Simulator_Product temp_result;
     double gravity_force = params.constants.g * params.constants.mass;
     double denominator = params.constants.mass * params.constants.radius;
+    double moment_inertia = denominator * params.constants.radius;
     double dt = params.constants.dt;
     // Run simulation
     for(double time = 0.0; time <= params.constants.max_time; time += dt) {
@@ -43,9 +47,14 @@ class PID_SimulatorHandler : virtual public PID_SimulatorIf {
         // Calculate the new state
         double force = 0.0;  // TODO: perform PID control
         // TODO: double check ordering of simulation
-        state.theta += state.omega*dt;
+        state.alpha = (force - gravity_force * sin(state.theta * D2R)) / denominator;
         state.omega += state.alpha*dt;
-        state.alpha = (force - gravity_force * sin(state.theta * PI / 180.0)) / denominator;
+        state.theta += state.omega*dt;
+        // Metrics
+        double kinetic_energy = 0.5 * moment_inertia * state.omega * state.omega * D2R * D2R;
+        double height = params.constants.radius * (1 + sin((state.theta - 90) * D2R));
+        double potential_energy = gravity_force * height;
+        CLOG(DEBUG, "main") << state.omega << '\t' << state.theta - 90 << '\t' << kinetic_energy << '\t' << potential_energy << '\t' << kinetic_energy + potential_energy;
     }
     // Record the simulated step
     temp_result.time = params.constants.max_time;
@@ -61,6 +70,7 @@ class PID_SimulatorHandler : virtual public PID_SimulatorIf {
 INITIALIZE_EASYLOGGINGPP
 
 int main(int argc, char **argv) {
+  initializeLogging(argc, argv);
   int port = 9090;
   shared_ptr<PID_SimulatorHandler> handler(new PID_SimulatorHandler());
   shared_ptr<TProcessor> processor(new PID_SimulatorProcessor(handler));

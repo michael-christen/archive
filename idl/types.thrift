@@ -47,7 +47,7 @@ const Simulator_Constants DefaultConstants = {
     "max_time": 10,
 
     "g": 9.81,
-    "radius": 1,
+    "radius": 0.001,
     "mass": 1
 }
 
@@ -58,7 +58,7 @@ const PID DefaultPID = {
 }
 
 const Model DefaultModel = {
-    "theta": 0,
+    "theta": 45,
     "omega": 0,
     "alpha": 0,
 
