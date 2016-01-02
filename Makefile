@@ -37,14 +37,19 @@ _GEN_JS_MAIN=$(_MAIN_IDL:.thrift=.js)
 _GEN_JS=$(_GEN_JS_TYPES) $(_GEN_JS_MAIN)
 GEN_JS=$(patsubst %,$(GEN_JS_DIR)/%,$(_GEN_JS))
 
-BINFILE= run
-# TODO: Add any .cpp files in backend/lib here
-SRC= main.cpp \
-	 utils.cpp \
+MAIN_BINFILE= run
+TEST_BINFILE= test-run
+SRC= utils.cpp \
 	 simulator.cpp
+MAIN_SRC= main.cpp
+TEST_SRC= test.cpp
 _OBJ=$(SRC:.cpp=.o)
 OBJ=$(patsubst %,$(ODIR)/%,$(_OBJ)) $(GEN_OBJ)
-# TODO: Add any .h files in backend/include here
+_MAIN_OBJ=$(MAIN_SRC:.cpp=.o)
+MAIN_OBJ=$(patsubst %,$(ODIR)/%,$(_MAIN_OBJ)) $(GEN_OBJ)
+_TEST_OBJ=$(TEST_SRC:.cpp=.o)
+TEST_OBJ=$(patsubst %,$(ODIR)/%,$(_TEST_OBJ)) $(GEN_OBJ)
+
 _DEPS= easylogging++.h \
 	   utils.h \
 	   simulator.h
@@ -62,13 +67,16 @@ else
         E = @echo 
 endif
 
-.PHONY: all help clean nuke generate
+.PHONY: all help clean nuke generate test
 
-all: $(BINFILE)
+all: $(MAIN_BINFILE)
+test: $(TEST_BINFILE)
+	./$(TEST_BINFILE)
 generate: $(GEN_DEPS) $(GEN_SRC) $(GEN_JS)
 help:
 	$(E)
 	$(E)all			create executable server and generate necessary files
+	$(E)test		generate & run a test script
 	$(E)generate	generate js & cpp code from idl/thrift files
 	$(E)clean		remove object files and executables
 	$(E)nuke		clean & remove any generated files
@@ -98,13 +106,17 @@ $(ODIR)/%.o: $(LDIR)/%.cpp $(DEPS)
 	$(Q)if [ ! -d `dirname $@` ]; then mkdir -p `dirname $@`; fi
 	$(Q)$(CXX) -o $@ -c $< $(CPPFLAGS) $(INCLUDE_PATHS)
 
-$(BINFILE):	$(OBJ) $(DEPS)
+$(MAIN_BINFILE):	$(OBJ) $(MAIN_OBJ) $(DEPS)
+	$(E)Linking $@
+	$(Q)$(CXX) -o $@ $(INCLUDE_PATHS) $^ $(CPPFLAGS) $(LIBS) $(LDFLAGS)
+
+$(TEST_BINFILE):	$(OBJ) $(TEST_OBJ) $(DEPS)
 	$(E)Linking $@
 	$(Q)$(CXX) -o $@ $(INCLUDE_PATHS) $^ $(CPPFLAGS) $(LIBS) $(LDFLAGS)
 
 clean:
 	$(E)Removing Files
-	$(Q)rm -f $(ODIR)/*.o $(BINFILE)
+	$(Q)rm -f $(ODIR)/*.o $(MAIN_BINFILE) $(TEST_BINFILE)
 	$(Q)if [ -d $(ODIR) ]; then rmdir $(ODIR); fi
 
 nuke: clean
