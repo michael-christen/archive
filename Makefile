@@ -40,12 +40,14 @@ GEN_JS=$(patsubst %,$(GEN_JS_DIR)/%,$(_GEN_JS))
 BINFILE= run
 # TODO: Add any .cpp files in backend/lib here
 SRC= main.cpp \
-	 utils.cpp
+	 utils.cpp \
+	 simulator.cpp
 _OBJ=$(SRC:.cpp=.o)
 OBJ=$(patsubst %,$(ODIR)/%,$(_OBJ)) $(GEN_OBJ)
 # TODO: Add any .h files in backend/include here
 _DEPS= easylogging++.h \
-	   utils.h
+	   utils.h \
+	   simulator.h
 DEPS=$(patsubst %,$(IDIR)/%,$(_DEPS)) $(GEN_DEPS)
 
 #Flag Handling

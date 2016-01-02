@@ -1,4 +1,3 @@
-#define LOGGING_CONFIG "configs/general.conf"
 #ifndef __UTILS__H__
 #define __UTILS__H__
 
