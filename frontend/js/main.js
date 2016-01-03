@@ -6,12 +6,15 @@ requirejs.config({
 });
 requirejs([
     'SimulatorKnockout',
-    'graph'
+    'Viz',
+    'Chart'
 ],
-function (SimulatorKO, graph) {
+function (SimulatorKO, Viz, Chart) {
 var transport = new Thrift.Transport("http://localhost:9090");
 var protocol  = new Thrift.Protocol(transport);
 var client    = new PID_SimulatorClient(protocol);
+var viz = new Viz();
+var charts = Chart.create_all();
 
 function getDefaultParameters() {
     var paramObj = new Simulator_Parameters();
@@ -47,7 +50,7 @@ function renderModel(timestamp) {
             if(next_step.time > t_diff) {
                 sim_index += i - 1;
                 sim_step = sim_steps[sim_index];
-                graph.update(sim_step.model.theta);
+                viz.update(sim_step.model.theta);
                 sim_frame = window.requestAnimationFrame(renderModel);
                 break;
             }
@@ -64,10 +67,25 @@ function runSimulation(simulated_steps) {
 
 
 function simulate() {
-    try {
-        var result = client.simulate(ko.mapping.toJS(simParams));
-        // Upate graph
+        var js_simParams = ko.mapping.toJS(simParams);
+        var result = client.simulate(js_simParams);
+        // Generate debugging info
+        var moment_inertia = js_simParams.constants.mass * Math.pow(js_simParams.constants.radius, 2);
+        var gravity_force = js_simParams.constants.mass * js_simParams.constants.g;
+        for(var i = 0; i < result.length; ++i) {
+            result[i].model['ke'] = moment_inertia * Math.pow(result[i].model['omega'], 2);
+            var height = js_simParams.constants.radius *
+                (1 + Math.sin((result[i].model['theta'] - 90) * Math.PI / 180.0));
+            result[i].model['pe'] = height * gravity_force;
+            result[i].model['me'] = result[i].model['ke'] + result[i].model['pe'];
+        }
+        // Populate metrics charts
+        for(var i = 0; i < charts.length; ++i) {
+            charts[i].plot(result);
+        }
+        // Upate viz
         runSimulation(result);
+    try {
     } catch(NetworkError) {
         console.log("<WARNING>: Network Error.");
         alert("Can't connect to the thrift server, try running it.");
@@ -78,5 +96,5 @@ function simulate() {
 // Register dom with functions
 $("#simulate-btn").click(simulate);
 
-graph.update(0);
+viz.update(0);
 });
