@@ -1,6 +1,6 @@
 ## Timing input signals
 
-#### 1/23/2017 Sunday
+#### 1/22/2017 Sunday
 
 Input capture mode from timers in section 15 of the reference manual gives us
 most of the information we need.
@@ -47,3 +47,27 @@ f_max = 10,000 RPM or 10/60 KHZ
 f_min = 100 RPM or 100/60 Hz
 T_min = 6ms
 T_max = 600ms
+
+
+#### 1/24/2017 Tuesday
+
+To test out input capture we're going to need a reliable delay function. Let's
+borrow the implementation from the main demo whose architecture follows:
+* Get RCC HCLK_Frequency
+* Configure systick as that frequency / 1000
+* Delay function sets global variable then waits for it to reach 0
+* In SysTick_Handler call function that decrements that global variable
+
+
+We can test it out by setting up a script to wait for serial transmissions and
+printing out the time difference. To be precise we'd setup an oscope on GPIO
+pins, but this should suffice.
+
+HCLK_Frequency begins at 48MHz, doesn't matter (duh!), just divide by 1000 and
+we'll be at ms.
+
+The actual spread recorded using our script doesn't look great, but in the right
+ballpark. I've recorded the results in a spreadsheet. To improve this in the
+future we could use GPIO instead of UART. To improve the actual spread, getting
+the actual clock value and using an external oscillator would probably do the
+job.
