@@ -71,3 +71,30 @@ ballpark. I've recorded the results in a spreadsheet. To improve this in the
 future we could use GPIO instead of UART. To improve the actual spread, getting
 the actual clock value and using an external oscillator would probably do the
 job.
+
+#### 1/28/2017 Saturday
+
+Let's trigger the input, we'll probably have to connect two pins with a jumper.
+
+Trying to print out the captured input wasn't working (only returning 0's)
+adding in a prescaler helped diagnose the issue. We were counting too quickly,
+slowing down to uart speeds and grabbing the actual counter value showed that
+we were sucessfully resetting the counter when the pin changes. Now we need to
+take a look at the status flags and see if any of the CC values are getting set.
+
+Setting up a debug log in main really helped out. Printed out status register
+and various capture values along with counter. Saw that CC2 was actually
+configured. Now I can setup a test with another GPIO.
+
+#### 1/30/2017 Monday
+
+Cleaned up main and read datasheet and reference manual more to get a better
+idea of what was going on. For the development of the input capture code we'll
+most likely need to add:
+* support for multiple captures
+* a way to record that we didn't hit anything, perhaps insert a 0 into the list
+    if we went the whole period. This will probably atleast involve adding a
+    interrupt handler on the update event.
+
+I'd like to add an automated test, combining an output pin to the trigger input
+and calling the delay function and comparing expected values with actual ones.
