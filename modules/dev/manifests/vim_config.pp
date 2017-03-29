@@ -13,4 +13,12 @@ define dev::vim_config (
     order  => 30,
     content => template('dev/vimrc-custom.erb'),
   }
+  # Add root editor config to home directory
+  file { "${home_directory}/.editorconfig":
+    ensure  => file,
+    owner   => $user,
+    group   => $user,
+    mode    => '0644',
+    content => template('dev/editorconfig.erb'),
+  }
 }
