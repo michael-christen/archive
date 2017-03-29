@@ -1,3 +1,6 @@
 class dev::params {
-  $home_directory = $::home_directory
+  $user = 'michael'  # $::user
+  # TODO: adjust for Mac
+  $base_path = '/home'
+  $home_directory = "${base_path}/${user}"
 }
