@@ -26,82 +26,101 @@ class dev(
     ],
   }
 	include git
-  git::config { 'core.editor':
-	  value => 'vim',
+	dev::git_config { 'core.editor':
+		value					 => 'vim',
+		user           => $user,
+		home_directory => $home_directory,
 	}
-  # git::config { 'alias.st':
-	#   value => 'status --short --branch',
-  #   user => $user,
-	# }
-  # git::config { 'alias.ci':
-	#   value => 'commit',
-  #   user => $user,
-	# }
-  # git::config { 'alias.br':
-	#   value => 'branch',
-  #   user => $user,
-	# }
-  # git::config { 'alias.co':
-	#   value => 'checkout',
-  #   user => $user,
-	# }
-  # git::config { 'alias.lo':
-	#   value => 'log --oneline',
-  #   user => $user,
-	# }
-  # git::config { 'alias.log-detail':
-	#   value => 'log -p',
-  #   user => $user,
-	# }
-  # git::config { 'alias.graph':
-	#   value => 'log --graph --oneline --all',
-  #   user => $user,
-	# }
-  # # Force push, but stop from overwriting future state
-  # git::config { 'alias.please':
-	#   value => 'push --force-with-lease',
-  #   user => $user,
-	# }
-  # # Add file to previous commit
-  # git::config { 'alias.commend':
-	#   value => 'commit --amend --no-edit',
-  #   user => $user,
-	# }
-	# # Only unstaged changes
-  # git::config { 'stsh':
-	# 	value => 'stash --keep-index',
-  #   user => $user,
-  # }
-	# # untracked & tracked
-  # git::config { 'staash':
-	# 	value => 'stash --include-untracked',
-  #   user => $user,
-  # }
-	# # ignored, untracked, tracked
-  # git::config { 'staaash':
-	# 	value => 'stash --all',
-  #   user => $user,
-  # }
-  # # Sweet graph
-  # git::config { 'grog':
-	# 	value => 'log --graph --oneline --abbrev-commit --decorate --all',
-  #   user => $user,
-  # }
+  dev::git_config { 'alias.st':
+	  value          => 'status --short --branch',
+    user            => $user,
+		home_directory => $home_directory,
+	}
+  dev::git_config { 'alias.ci':
+	  value => 'commit',
+    user => $user,
+		home_directory => $home_directory,
+	}
+  dev::git_config { 'alias.br':
+	  value => 'branch',
+    user => $user,
+		home_directory => $home_directory,
+	}
+  dev::git_config { 'alias.co':
+	  value => 'checkout',
+    user => $user,
+		home_directory => $home_directory,
+	}
+  dev::git_config { 'alias.lo':
+	  value => 'log --oneline',
+    user => $user,
+		home_directory => $home_directory,
+	}
+  dev::git_config { 'alias.log-detail':
+	  value => 'log -p',
+    user => $user,
+		home_directory => $home_directory,
+	}
+  dev::git_config { 'alias.graph':
+	  value => 'log --graph --oneline --all',
+    user => $user,
+		home_directory => $home_directory,
+	}
+  # Force push, but stop from overwriting future state
+  dev::git_config { 'alias.please':
+	  value => 'push --force-with-lease',
+    user => $user,
+		home_directory => $home_directory,
+	}
+  # Add file to previous commit
+  dev::git_config { 'alias.commend':
+	  value => 'commit --amend --no-edit',
+    user => $user,
+		home_directory => $home_directory,
+	}
+	# Only unstaged changes
+  dev::git_config { 'alias.stsh':
+		value => 'stash --keep-index',
+    user => $user,
+		home_directory => $home_directory,
+  }
+	# untracked & tracked
+  dev::git_config { 'alias.staash':
+		value => 'stash --include-untracked',
+    user => $user,
+		home_directory => $home_directory,
+  }
+	# ignored, untracked, tracked
+  dev::git_config { 'alias.staaash':
+		value => 'stash --all',
+    user => $user,
+		home_directory => $home_directory,
+  }
+  # Sweet graph
+  dev::git_config { 'alias.grog':
+		value => 'log --graph --oneline --abbrev-commit --decorate --all',
+    user => $user,
+		home_directory => $home_directory,
+  }
   # # Clean merged branches from repo
-  # git::config { 'clean-remote':
-	# 	value => "!for b in $(git br -r --merged master); do echo $b | awk '{split($0,a,\"/\"); print a[2]}' | xargs git push origin --delete; done",
+  # dev::git_config { 'alias.clean-remote':
+	# 	value => "!for b in \\$(git br -r --merged master); do echo \\$b | awk '{split(\$0,a,\"/\"); print a[2]}' | xargs git push origin --delete; done",
   #   user => $user,
+	# 	home_directory => $home_directory,
   # }
-  # git::config { 'list-remote':
-	# 	value => "!for b in $(git br -r --merged master); do echo $b | awk '{split($0,a,\"/\"); print a[2]}'; done",
+  # dev::git_config { 'alias.list-remote':
+	# 	value => "!for b in \\$(git br -r --merged master); do echo \\$(b) | awk '{split(\$0,a,\"/\"); print a[2]}'; done",
   #   user => $user,
+	# 	home_directory => $home_directory,
   # }
-  # git::config { 'clean-local':
-	# 	value => "!git br --merged master | grep -v master | xargs git br -d",
-  #   user => $user,
-  # }
-  # git::config { 'list-local':
-	# 	value => "!git br --merged master | grep -v master",
-  #   user => $user,
-  # }
+  dev::git_config { 'alias.clean-local':
+		value => "!git br --merged master | grep -v master | xargs git br -d",
+    user => $user,
+		home_directory => $home_directory,
+  }
+  dev::git_config { 'alias.list-local':
+		value => "!git br --merged master | grep -v master",
+    user => $user,
+		home_directory => $home_directory,
+  }
 }
