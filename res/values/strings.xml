@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">DroidStats</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="home_title">Forms</string>
+    <string name="create_form_button">Create a New Form</string>
+    <string name="title_activity_list_view_loader">ListViewLoader</string>
+    <string name="title_activity_list_fruit">ListFruitActivity</string>
+    <string name="action_create_form">Create New Form</string>
+    <string name="title_activity_create_form">CreateFormActivity</string>
+    <string name="form_name_hint">New Form Name</string>
+
+</resources>
