@@ -1,0 +1,12 @@
+PyYAML==3.11
+argh==0.26.1
+argparse==1.2.1
+elasticsearch==1.9.0
+elasticsearch-dsl==0.0.11
+pathtools==0.1.2
+python-dateutil==2.4.2
+python-magic==0.4.10
+six==1.10.0
+urllib3==1.14
+watchdog==0.8.3
+wsgiref==0.1.2

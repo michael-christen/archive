@@ -1,0 +1,10 @@
+global_ignore:
+    - '*.pyc'
+    - '*.o'
+    - '*~'
+    - '*.swp'
+    - '*.swpx'
+    - '*4913'
+monitor_paths:
+    - './example_dir'
+    - './second_example_dir'
