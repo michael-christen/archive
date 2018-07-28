@@ -1,0 +1,40 @@
+" Generic Settings
+syntax on
+" Tmux config
+if &term =~ '^screen'
+    " term 256color doesn't work, so have different setting
+    set term=screen-256color
+    set ttymouse=xterm2
+else
+    set term=xterm-256color
+endif
+let g:solarized_termcolors=256
+set background=dark
+colorscheme solarized
+set number
+set ruler
+set mouse=a
+set textwidth:79
+set cursorcolumn
+filetype on
+map ;; <Esc>
+filetype plugin indent on
+set tabstop:4
+set shiftwidth:4
+set expandtab
+set nobackup
+set nowritebackup
+set noswapfile
+" File settings
+if has("autocmd")
+    autocmd FileType c,cpp :set cindent
+    autocmd BufRead,BufNewFile *.ino set filetype=cpp
+    autocmd BufRead,BufNewFile *.thrift set filetype=idl
+    autocmd BufRead,BufNewFile *.pp   set filetype=conf
+endif
+" Mappings
+nnoremap <c-j> <c-w>j
+nnoremap <c-k> <c-w>k
+nnoremap <c-h> <c-w>h
+nnoremap <c-l> <c-w>l
+nmap <CR> o<Esc>k
