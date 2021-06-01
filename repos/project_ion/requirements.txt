@@ -7,6 +7,6 @@ pathtools==0.1.2
 python-dateutil==2.4.2
 python-magic==0.4.10
 six==1.10.0
-urllib3==1.14
+urllib3==1.26.5
 watchdog==0.8.3
 wsgiref==0.1.2
